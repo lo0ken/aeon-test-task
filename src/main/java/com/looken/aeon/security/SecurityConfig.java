@@ -28,6 +28,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().rememberMe();
 
         http.csrf().disable();
+        http.headers().frameOptions().disable();
     }
 
     @Override
