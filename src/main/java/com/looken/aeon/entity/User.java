@@ -22,4 +22,8 @@ public class User {
     private String password;
 
     private BigDecimal balance;
+
+    public User(Integer id) {
+        this.id = id;
+    }
 }
