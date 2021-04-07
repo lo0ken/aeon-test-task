@@ -23,6 +23,10 @@ public class User {
 
     private BigDecimal balance;
 
+    private Boolean isLoginDisabled;
+
+    private Integer failedLoginAttempts;
+
     public User(Integer id) {
         this.id = id;
     }

@@ -21,6 +21,10 @@ public class UserDto implements UserDetails {
 
     private BigDecimal balance;
 
+    private Boolean isLoginDisabled;
+
+    private Integer failedLoginAttempts;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();

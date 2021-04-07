@@ -3,10 +3,18 @@ package com.looken.aeon.service.api;
 import com.looken.aeon.dto.UserDto;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 public interface UserService {
-    Optional<UserDto> findByLogin(String login);
+
+    Integer getIdByLogin(String login);
+
+    UserDto findByLogin(String login);
 
     UserDto decreaseBalance(Integer userId, BigDecimal amount);
+
+    void disableLogin(Integer userId);
+
+    void increaseFailedLoginAttempt(Integer userId);
+
+    void resetBruteForceCounter(String login);
 }

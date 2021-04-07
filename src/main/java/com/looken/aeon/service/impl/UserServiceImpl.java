@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -28,18 +27,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDto> findByLogin(String login) {
+    public Integer getIdByLogin(String login) {
+        return findByLoginIfExists(login).getId();
+    }
+
+    @Override
+    public UserDto findByLogin(String login) {
         log.debug("searching user with login: {}", login);
 
-        Optional<User> userOptional = userRepository.findByLogin(login);
-        return userOptional.map(userMapper::map);
+        User user = findByLoginIfExists(login);
+        return userMapper.map(user);
+    }
+
+    private User findByLoginIfExists(String login) {
+        return userRepository.findByLogin(login).orElseThrow(() ->
+                new IllegalArgumentException("User with login: {} not found!"));
     }
 
     @Override
     public UserDto decreaseBalance(Integer userId, BigDecimal amount) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("User with id: " + userId +" not found"));
+        User user = findById(userId);
 
         User decreased = decreaseBalanceIfPossible(user, amount);
 
@@ -58,5 +65,40 @@ public class UserServiceImpl implements UserService {
 
         user.setBalance(currentBalance.subtract(amount));
         return user;
+    }
+
+    @Override
+    public void disableLogin(Integer userId) {
+        User user = findById(userId);
+        user.setIsLoginDisabled(true);
+
+        userRepository.save(user);
+
+        log.debug("Disabled login: {}", user.getLogin());
+    }
+
+    @Override
+    public void increaseFailedLoginAttempt(Integer userId) {
+        User user = findById(userId);
+        user.setFailedLoginAttempts(
+                user.getFailedLoginAttempts() + 1
+        );
+
+        userRepository.save(user);
+
+        log.debug("Increased failed login attempt of user with login: {}", user.getLogin());
+    }
+
+    @Override
+    public void resetBruteForceCounter(String login) {
+        User user = findByLoginIfExists(login);
+        user.setIsLoginDisabled(false);
+        user.setFailedLoginAttempts(0);
+    }
+
+    private User findById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User with id: " + userId + " not found"));
     }
 }
